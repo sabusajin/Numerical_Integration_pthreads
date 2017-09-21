@@ -32,6 +32,39 @@ typedef struct {
 
 } integrateArgs;
 
+void *integrationThreadLevel (integrateArgs *args) {
+  int i;
+  float x = 0.0;
+  float *result = (float *) malloc (sizeof(float));
+  *result = 0.0;
+
+
+  float multiplier = (args->b - args->a)/ (float) args->n;
+  int end = args->start + args->length;
+
+  for (i=args->start; i<end; i++) {
+    x = args->a + ((float)i + 0.5) * multiplier;
+
+    switch (args->functionid) {
+      case 1:
+        *result = *result + f1(x, args->intensity)*multiplier;
+        break;
+      case 2:
+        *result = *result + f2(x, args->intensity)*multiplier;
+        break;
+      case 3:
+        *result = *result + f3(x, args->intensity)*multiplier;
+        break;
+      case 4:
+        *result = *result + f4(x, args->intensity)*multiplier;
+        break;
+      default:
+      break;
+    }
+  }
+  return (void *)result;
+}
+
 void integrationIterationLevel (integrateArgs *args) {
 
   int i;
@@ -82,9 +115,10 @@ int main (int argc, char* argv[]) {
   int nbthreads = atoi(argv[6]);
   std::string synctype = argv[7];
 
-  float result;
+  float result = 0.0;
   int k;
   int divisibility = DIVISIBLE;
+
 
   /*check for wrong input*/
   if (functionid < 0 || functionid > 4) {
@@ -119,21 +153,48 @@ int main (int argc, char* argv[]) {
       if(divisibility == NONDIVISIBLE && k==nbthreads-1)
         args[k].length = n - (nbthreads-1)*chunksize;
 
-      int err = pthread_create(&threads[k],NULL,
-        (void *(*)(void *)) integrationIterationLevel,
-        (void *) &args[k]);
-      if (err!=0)
-          std::cout<<"ERROR creating thread!!!!"<<std::endl;
+      if (synctype.compare("iteration")==0){
+
+        int err = pthread_create(&threads[k],NULL,
+          (void *(*)(void *)) integrationIterationLevel,
+          (void *) &args[k]);
+        if (err!=0)
+            std::cout<<"ERROR creating thread!!!!"<<std::endl;
+
+      }
+      else if (synctype.compare("thread")==0){
+        int err = pthread_create(&threads[k],NULL,
+           (void *(*)(void *)) integrationThreadLevel,
+          (void *) &args[k]);
+        if (err!=0)
+            std::cout<<"ERROR creating thread!!!!"<<std::endl;
+      }
+      else {
+        std::cout<<"Please enter either thread or iteration!!"<<std::endl;
+        exit(-1);
+      }
 
 
     }
     for (k=0; k<nbthreads; k++)
     {
-      pthread_join(threads[k], NULL);
+      if (synctype.compare("iteration")==0){
+        pthread_join(threads[k], NULL);
+      }
+      else if (synctype.compare("thread")==0){
+
+        void *retval;
+        pthread_join(threads[k], &retval);
+        result = result + *(float *)retval;
+      }
 
     }
-
+    if (synctype.compare("iteration")==0){
     std::cout<<sum<<std::endl;
+  }
+  else{
+    std::cout<<result<<std::endl;
+  }
 
     free (threads);
     free (args);

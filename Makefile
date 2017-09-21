@@ -1,6 +1,6 @@
 CFLAGS=-O3 -std=c11
 CXXFLAGS=-O3 -std=c++11 -g
-LDFLAGS=-lpthread
+LDFLAGS=-pthread
 ARCHIVES=libfunctions.a
 LD=g++
 
@@ -18,7 +18,7 @@ libfunctions.a: functions.o
 libintegrate.a: sequential_lib.o
 	ar rcs libintegrate.a sequential_lib.o
 
-sequential: sequential.o 
+sequential: sequential.o
 	$(LD) $(LDFLAGS) sequential.o  libintegrate.a $(ARCHIVES) -o sequential
 
 test: static_sched dynamic_sched approx

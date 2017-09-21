@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <chrono>
 #include <pthread.h>
 
 #define DIVISIBLE 1
@@ -140,7 +143,7 @@ int main (int argc, char* argv[]) {
       std::cout<<"Unable to allocate memory";
       exit(-1);
     }
-
+    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     for (k=0; k<nbthreads; k++)
     {
       args[k].functionid = functionid;
@@ -176,8 +179,7 @@ int main (int argc, char* argv[]) {
 
 
     }
-    for (k=0; k<nbthreads; k++)
-    {
+    for (k=0; k<nbthreads; k++){
       if (synctype.compare("iteration")==0){
         pthread_join(threads[k], NULL);
       }
@@ -189,13 +191,16 @@ int main (int argc, char* argv[]) {
       }
 
     }
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+
     if (synctype.compare("iteration")==0){
     std::cout<<sum<<std::endl;
   }
   else{
     std::cout<<result<<std::endl;
   }
-
+  std::cerr<<elapsed_seconds.count()<<std::endl;
     free (threads);
     free (args);
 

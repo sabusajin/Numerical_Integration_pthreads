@@ -28,14 +28,6 @@ for intensity in $INTENSITIES;
 do
     for n in $NS;
     do
-	./sequential 1 0 10 ${n} ${intensity} 2>${RESULTDIR}/sequential_${n}_${intensity}  >/dev/null
-    done
-done
-
-for intensity in $INTENSITIES;
-do
-    for n in $NS;
-    do
 	for thread in ${THREADS};
 	do
 	    for sync in iteration thread;
@@ -110,8 +102,8 @@ do
 	GCMDSP="${GCMDSP} ; set key top left; \
                             set xlabel 'threads'; \
                             set ylabel 'speedup'; \
-                            set xrange [1:20]; \
-                            set yrange [1:20]; \
+                            set xrange [*:20]; \
+                            set yrange [0:20]; \
                             set title'n=$n intensity=$intensity'; \
                 plot '${RESULTDIR}/speedup_static_${n}_${intensity}_iteration' u 1:(\$2/\$3) t 'iteration' lc 1, \
                      '${RESULTDIR}/speedup_static_${n}_${intensity}_thread' u 1:(\$2/\$3) lc 3 t 'thread'; "
@@ -126,7 +118,7 @@ do
                             set xlabel 'n'; \
                             set ylabel 'speedup'; \
                             set xrange [*:*]; \
-                            set yrange [1:20]; \
+                            set yrange [0:20]; \
                             set title'thread=${thread} intensity=${intensity}'; \
                 plot '${RESULTDIR}/speedupn_static_${thread}_${intensity}_iteration' u 1:(\$2/\$3) t 'iteration' lc 1, \
                      '${RESULTDIR}/speedupn_static_${thread}_${intensity}_thread' u 1:(\$2/\$3) lc 3 t 'thread'; "
@@ -141,7 +133,7 @@ do
                             set xlabel 'intensity'; \
                             set ylabel 'speedup'; \
                             set xrange [*:*]; \
-                            set yrange [1:20]; \
+                            set yrange [0:20]; \
                             set title'thread=${thread} intensity=${intensity}'; \
                 plot '${RESULTDIR}/speedupi_static_${n}_${thread}_iteration' u 1:(\$2/\$3) t 'iteration' lc 1, \
                      '${RESULTDIR}/speedupi_static_${n}_${thread}_thread' u 1:(\$2/\$3) lc 3 t 'thread'; "

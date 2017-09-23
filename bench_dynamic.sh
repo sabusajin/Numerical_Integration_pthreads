@@ -100,7 +100,7 @@ do
                               set xlabel 'granularity'; \
                               set ylabel 'speedup'; \
                               set xrange [*:*]; \
-                              set yrange [1:20]; \
+                              set yrange [*:20]; \
                               set title'n=$n intensity=$intensity thread=${thread}'; \
                     plot '${RESULTDIR}/speedupc_dynamic_${n}_${thread}_${intensity}_iteration' u 1:(\$2/\$3) t 'iteration' lc 1, \
                          '${RESULTDIR}/speedupc_dynamic_${n}_${thread}_${intensity}_chunk' u 1:(\$2/\$3) t 'chunk' lc 4, \
@@ -119,7 +119,7 @@ do
                                   set xlabel 'threads'; \
                                   set ylabel 'speedup'; \
                                   set xrange [*:*]; \
-                                  set yrange [1:20]; \
+                                  set yrange [*:20]; \
                                   set title 'thread=${thread} intensity=${intensity} granularity=${gran}'; \
                 plot '${RESULTDIR}/speedupt_dynamic_${n}_${intensity}_iteration_${gran}' u 1:(\$2/\$3) t 'iteration' lc 1, \
                      '${RESULTDIR}/speedupt_dynamic_${n}_${intensity}_chunk_${gran}' u 1:(\$2/\$3) t 'chunk' lc 4, \

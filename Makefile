@@ -18,7 +18,7 @@ libfunctions.a: functions.o
 libintegrate.a: sequential_lib.o
 	ar rcs libintegrate.a sequential_lib.o
 
-sequential: sequential.o
+sequential: sequential.o 
 	$(LD) $(LDFLAGS) sequential.o  libintegrate.a $(ARCHIVES) -o sequential
 
 test: static_sched dynamic_sched approx
@@ -33,5 +33,5 @@ dynamic_sched_plots.pdf: dynamic_sched sequential
 bench: static_sched_plots.pdf dynamic_sched_plots.pdf
 
 
-assignment-pthreads.tgz: static_sched.cpp dynamic_sched.cpp approx.cpp Makefile bench_static.sh bench_dynamic.sh test.sh assignment-pthreads.pdf libfunctions.a libintegrate.a sequential.cpp
-	tar zcvf assignment-pthreads.tgz static_sched.cpp dynamic_sched.cpp approx.cpp Makefile bench_static.sh bench_dynamic.sh test.sh assignment-pthreads.pdf libfunctions.a libintegrate.a sequential.cpp
+assignment-pthreads.tgz: static_sched.cpp dynamic_sched.cpp approx.cpp Makefile bench_static.sh bench_dynamic.sh test.sh assignment-pthreads.pdf libfunctions.a libintegrate.a sequential.cpp bench_sequential.sh
+	tar zcvf assignment-pthreads.tgz static_sched.cpp dynamic_sched.cpp approx.cpp Makefile bench_static.sh bench_dynamic.sh test.sh assignment-pthreads.pdf libfunctions.a libintegrate.a sequential.cpp bench_sequential.sh

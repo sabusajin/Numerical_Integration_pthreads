@@ -20,10 +20,13 @@ float f4(float x, int intensity);
 }
 #endif
 
+/*Mutex declarations*/
 pthread_mutex_t sum_protect = PTHREAD_MUTEX_INITIALIZER;
 
+/*GlobAl variaable declarations*/
 float sum = 0.0;
 
+/*Structure to pass the numerical integration arguments to threads*/
 typedef struct {
   int functionid;
   float a;
@@ -34,6 +37,9 @@ typedef struct {
   int length;
 
 } integrateArgs;
+
+/*Does numerical integration at thread level
+Returns the sum of the values calculated per thread*/
 
 void *integrationThreadLevel (integrateArgs *args) {
   int i;
@@ -67,6 +73,9 @@ void *integrationThreadLevel (integrateArgs *args) {
   }
   return (void *)result;
 }
+
+/*Does Numerical Integration at iteration level
+The iteration_sum GlobAl variable must be protected by mutex on each change*/
 
 void integrationIterationLevel (integrateArgs *args) {
 
@@ -107,6 +116,9 @@ void integrationIterationLevel (integrateArgs *args) {
   }
 }
 
+/*Main function - Takes 8 command line arguments for numerical inetgration.
+Starts the threads and waits using join
+Calculates time taken for computation*/
 
 int main (int argc, char* argv[]) {
 

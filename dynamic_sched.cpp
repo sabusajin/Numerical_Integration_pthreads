@@ -17,6 +17,7 @@ float f4(float x, int intensity);
 }
 #endif
 
+/*Structure to pass the numerical integration arguments to threads*/
 typedef struct {
   int functionid;
   float a;
@@ -26,14 +27,21 @@ typedef struct {
 
 } integrateArgs;
 
+/*GlobAl variaable declarations*/
 float iteration_sum = 0.0;
 float chunk_sum = 0.0;
-
-
 int granularity = 0;
 unsigned long  commence = 0, stop = 0;
+
+/*Mutex declarations*/
 pthread_mutex_t getNext_protect = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t sum_protect = PTHREAD_MUTEX_INITIALIZER;
+
+
+/*Function to check whether all the iterations of Numerical Integration
+is done
+returns true if threads are left to start working on some chunks
+returns false if threads are yet to work on some chunks*/
 
 bool done() {
   if (commence == stop)
@@ -41,6 +49,12 @@ bool done() {
   else
     return false;
 }
+
+/*Function to pass the chunk indices to the
+worker threads
+commence - start of chunk
+end - end of chunk
+*/
 void getNext(int *begin, int *end) {
   pthread_mutex_lock(&getNext_protect);
   *begin = commence;
@@ -54,6 +68,9 @@ void getNext(int *begin, int *end) {
   }
   pthread_mutex_unlock(&getNext_protect);
 }
+
+/*Does numerical integration at thread level
+Returns the sum of the values calculated per thread*/
 
 void *integrationThreadLevel (integrateArgs *args) {
 
@@ -101,6 +118,9 @@ void *integrationThreadLevel (integrateArgs *args) {
   return (void *)result;
 }
 
+/*Does Numerical Integration at iteration level
+The iteration_sum GlobAl variable must be protected by mutex on each change*/
+
 void integrationIterationLevel(integrateArgs *args) {
 
   float x = 0.0;
@@ -142,6 +162,12 @@ void integrationIterationLevel(integrateArgs *args) {
   }
 
 }
+
+/*Does Numerical Integration at chunk level
+The total sum of each chunk is calculated using a local variable and
+is aggregated in to a global; variable chunk_sum when the calculations
+on the chunk is finished */
+
 void integrationChunkLevel(integrateArgs *args) {
 
   float x = 0.0;
@@ -190,6 +216,10 @@ void integrationChunkLevel(integrateArgs *args) {
 
 }
 
+/*Main function - Takes 8 command line arguments for numerical inetgration.
+Starts the threads and waits using join
+Calculates time taken for computation*/
+
 int main (int argc, char* argv[]) {
 
   if (argc < 9) {
@@ -207,9 +237,7 @@ int main (int argc, char* argv[]) {
   granularity = atoi(argv[8]);
   stop = n;
   int k = 0;
-
   float thread_result = 0.0;
-
 
   /*check for wrong input*/
   if (functionid < 0 || functionid > 4) {

@@ -207,8 +207,8 @@ int main (int argc, char* argv[]) {
     std::cout<<result<<std::endl;
   }
   std::cerr<<elapsed_seconds.count()<<std::endl;
-    free (threads);
-    free (args);
+  free (threads);
+  free (args);
 
 
 }

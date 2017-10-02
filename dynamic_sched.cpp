@@ -1,4 +1,8 @@
 #include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <chrono>
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +26,7 @@ typedef struct {
 
 } integrateArgs;
 
-float sum = 0.0;
+float iteration_sum = 0.0;
 float chunk_sum = 0.0;
 
 
@@ -112,22 +116,22 @@ void integrationIterationLevel(integrateArgs *args) {
       switch (args->functionid) {
         case 1:
           pthread_mutex_lock(&sum_protect);
-          sum = sum + f1(x, args->intensity)*multiplier;
+          iteration_sum = iteration_sum + f1(x, args->intensity)*multiplier;
           pthread_mutex_unlock(&sum_protect);
           break;
         case 2:
           pthread_mutex_lock(&sum_protect);
-          sum = sum + f2(x, args->intensity)*multiplier;
+          iteration_sum = iteration_sum + f2(x, args->intensity)*multiplier;
           pthread_mutex_unlock(&sum_protect);
           break;
         case 3:
           pthread_mutex_lock(&sum_protect);
-          sum = sum + f3(x, args->intensity)*multiplier;
+          iteration_sum = iteration_sum + f3(x, args->intensity)*multiplier;
           pthread_mutex_unlock(&sum_protect);
           break;
         case 4:
           pthread_mutex_lock(&sum_protect);
-          sum = sum + f4(x, args->intensity)*multiplier;
+          iteration_sum = iteration_sum + f4(x, args->intensity)*multiplier;
           pthread_mutex_unlock(&sum_protect);
           break;
         default:
@@ -204,7 +208,7 @@ int main (int argc, char* argv[]) {
   stop = n;
   int k = 0;
 
-  float result = 0.0;
+  float thread_result = 0.0;
 
 
   /*check for wrong input*/
@@ -222,6 +226,7 @@ int main (int argc, char* argv[]) {
       std::cout<<"Unable to allocate memory";
       exit(-1);
     }
+    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     for (k=0; k<nbthreads; k++){
 
       args[k].functionid = functionid;
@@ -265,19 +270,22 @@ int main (int argc, char* argv[]) {
       else if (synctype.compare("thread")==0) {
         void *retval;
         pthread_join(threads[k], &retval);
-        result = result + *(float *)retval;
+        thread_result = thread_result + *(float *)retval;
       }
     }
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
     if (synctype.compare("iteration")==0){
-      std::cout<<sum<<std::endl;
+      std::cout<<iteration_sum<<std::endl;
     }
     else if (synctype.compare("chunk")==0){
       std::cout <<chunk_sum<<std::endl;
 
     }
     else if (synctype.compare("thread")==0){
-      std::cout <<result<<std::endl;
+      std::cout <<thread_result<<std::endl;
     }
+    std::cerr<<elapsed_seconds.count()<<std::endl;
 
     free (threads);
     free (args);

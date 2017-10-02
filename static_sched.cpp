@@ -80,24 +80,30 @@ void integrationIterationLevel (integrateArgs *args) {
     x = args->a + ((float)i + 0.5) * multiplier;
 
 
-    pthread_mutex_lock(&sum_protect);
     switch (args->functionid) {
       case 1:
+        pthread_mutex_lock(&sum_protect);
         sum = sum + f1(x, args->intensity)*multiplier;
+        pthread_mutex_unlock(&sum_protect);
         break;
       case 2:
+        pthread_mutex_lock(&sum_protect);
         sum = sum + f2(x, args->intensity)*multiplier;
+        pthread_mutex_unlock(&sum_protect);
         break;
       case 3:
+        pthread_mutex_lock(&sum_protect);
         sum = sum + f3(x, args->intensity)*multiplier;
+        pthread_mutex_unlock(&sum_protect);
         break;
       case 4:
+        pthread_mutex_lock(&sum_protect);
         sum = sum + f4(x, args->intensity)*multiplier;
+        pthread_mutex_unlock(&sum_protect);
         break;
       default:
-      break;
+        break;
     }
-    pthread_mutex_unlock(&sum_protect);
   }
 }
 

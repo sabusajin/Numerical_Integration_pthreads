@@ -30,7 +30,8 @@ typedef struct {
 /*GlobAl variaable declarations*/
 float iteration_sum = 0.0;
 float chunk_sum = 0.0;
-int granularity = 0;
+float th_sum = 0.0;
+int granularity = 0, counter = 0;
 unsigned long  commence = 0, stop = 0;
 
 /*Mutex declarations*/
@@ -44,7 +45,7 @@ returns true if threads are left to start working on some chunks
 returns false if threads are yet to work on some chunks*/
 
 bool done() {
-  if (commence == stop)
+  if (commence == -1)
     return true;
   else
     return false;
@@ -56,17 +57,22 @@ commence - start of chunk
 end - end of chunk
 */
 void getNext(int *begin, int *end) {
-  pthread_mutex_lock(&getNext_protect);
-  *begin = commence;
-  if (commence + granularity >= stop) {
-    *end = stop;
-    commence = stop;
+  pthread_mutex_lock(&sum_protect);
+  if (!done()){
+    *begin = commence;
+    commence+=granularity;
+    if (commence + granularity >= stop) {
+      *end = stop;
+      commence = -1;
+    }
+    else {
+    *end = commence;
+    }
+  } else {
+    *begin = 0;
+    *end = -1;
   }
-  else {
-    *end = commence + granularity;
-    commence = commence + granularity;
-  }
-  pthread_mutex_unlock(&getNext_protect);
+  pthread_mutex_unlock(&sum_protect);
 }
 
 /*Does numerical integration at thread level
@@ -115,6 +121,10 @@ void *integrationThreadLevel (integrateArgs *args) {
     }
 
   }
+
+  pthread_mutex_lock(&sum_protect);
+  th_sum += *result;
+  pthread_mutex_unlock(&sum_protect);
   return (void *)result;
 }
 
@@ -292,14 +302,7 @@ int main (int argc, char* argv[]) {
 
     }
     for (k=0; k<nbthreads; k++){
-      if (synctype.compare("iteration")==0 || synctype.compare("chunk")==0){
-        pthread_join(threads[k], NULL);
-      }
-      else if (synctype.compare("thread")==0) {
-        void *retval;
-        pthread_join(threads[k], &retval);
-        thread_result = thread_result + *(float *)retval;
-      }
+      pthread_join(threads[k], NULL);
     }
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
@@ -311,7 +314,7 @@ int main (int argc, char* argv[]) {
 
     }
     else if (synctype.compare("thread")==0){
-      std::cout <<thread_result<<std::endl;
+      std::cout <<th_sum<<std::endl;
     }
     std::cerr<<elapsed_seconds.count()<<std::endl;
 

@@ -25,6 +25,7 @@ pthread_mutex_t sum_protect = PTHREAD_MUTEX_INITIALIZER;
 
 /*GlobAl variaable declarations*/
 float sum = 0.0;
+float th_sum = 0.0;
 
 /*Structure to pass the numerical integration arguments to threads*/
 typedef struct {
@@ -71,6 +72,9 @@ void *integrationThreadLevel (integrateArgs *args) {
       break;
     }
   }
+  pthread_mutex_lock(&sum_protect);
+  th_sum += *result;
+  pthread_mutex_unlock(&sum_protect);
   return (void *)result;
 }
 
@@ -198,16 +202,7 @@ int main (int argc, char* argv[]) {
 
     }
     for (k=0; k<nbthreads; k++){
-      if (synctype.compare("iteration")==0){
         pthread_join(threads[k], NULL);
-      }
-      else if (synctype.compare("thread")==0){
-
-        void *retval;
-        pthread_join(threads[k], &retval);
-        result = result + *(float *)retval;
-      }
-
     }
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
@@ -216,7 +211,7 @@ int main (int argc, char* argv[]) {
     std::cout<<sum<<std::endl;
   }
   else{
-    std::cout<<result<<std::endl;
+    std::cout<<th_sum<<std::endl;
   }
   std::cerr<<elapsed_seconds.count()<<std::endl;
   free (threads);
